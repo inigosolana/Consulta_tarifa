@@ -17,7 +17,7 @@ from typing import Annotated
 
 import pandas as pd
 from openpyxl import load_workbook
-from openai import AsyncOpenAI
+from groq import AsyncGroq
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +33,14 @@ SHEET_NAME = "informe CRM"
 COL_NOMBRE = "Nombre"
 COL_INFO   = "Información comercial"
 
-_openai_client: AsyncOpenAI | None = None
+_groq_client: AsyncGroq | None = None
 
 
-def _get_openai_client() -> AsyncOpenAI:
-    global _openai_client
-    if _openai_client is None:
-        _openai_client = AsyncOpenAI()
-    return _openai_client
+def _get_groq_client() -> AsyncGroq:
+    global _groq_client
+    if _groq_client is None:
+        _groq_client = AsyncGroq()
+    return _groq_client
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +195,7 @@ async def analizar_transcripcion(nombre_tarifa: str, transcripcion: str) -> str:
         transcripcion=transcripcion,
     )
 
-    client = _get_openai_client()
+    client = _get_groq_client()
     logger.info(
         "Enviando transcripción al LLM (%d chars) para tarifa '%s'...",
         len(transcripcion),
@@ -203,13 +203,13 @@ async def analizar_transcripcion(nombre_tarifa: str, transcripcion: str) -> str:
     )
 
     response = await client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
         max_tokens=600,
     )
 
-    resultado = response.choices[0].message.content.strip()
+    resultado = (response.choices[0].message.content or "").strip()
     logger.info("LLM extrajo: %.120s...", resultado)
     return resultado
 

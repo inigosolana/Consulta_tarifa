@@ -33,7 +33,7 @@ from livekit.agents import (
     cli,
     function_tool,
 )
-from livekit.plugins import cartesia, deepgram, openai, silero
+from livekit.plugins import cartesia, deepgram, groq, silero
 
 from knowledge_feedback import buscar_tarifa, procesar_post_llamada
 
@@ -222,7 +222,7 @@ async def entrypoint(ctx: JobContext) -> None:
 
     session = AgentSession(
         stt=deepgram.STT(model="nova-2", language="es"),
-        llm=openai.LLM(model="gpt-4o-mini"),
+        llm=groq.LLM(model="llama-3.3-70b-versatile"),
         tts=cartesia.TTS(
             voice=os.getenv("VOICE_ID_ESPANOLA", "cefcb124-080b-4655-b31f-932f3ee743de"),
         ),
